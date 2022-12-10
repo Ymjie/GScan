@@ -3,13 +3,14 @@ package Spider
 import (
 	"GScan/infoscan/dao"
 	"GScan/infoscan/service/Crawler/Processor"
+	"GScan/pkg/logger"
 	"errors"
-	"fmt"
 	"net/url"
 	"strings"
 )
 
 func (s *Spider) Processor(page *dao.Page, body []byte) {
+	page.Title = Processor.Gettitle(body)
 	parse, _ := url.Parse(page.URL)
 	if parse.Host != s.Host {
 		page.External = true
@@ -17,18 +18,18 @@ func (s *Spider) Processor(page *dao.Page, body []byte) {
 		s.CallbackFunc(page, body)
 		return
 	}
-	if page.Error != "" {
+	if page.Status != "Success" {
 		if strings.Contains(page.Error, "timeout") {
 			if page.ErrorNum < s.config.Retry {
 				s.AddUrlbypage([]*dao.Page{page})
 			}
 		}
+		logger.PF(logger.LWARN, "<Spider>[%s]%s访问出错(%d),%s", s.Host, page.URL, page.ErrorNum, page.Error)
 		s.DAO.UpdatePage(page)
 		return
 	}
-	page.Title = Processor.Gettitle(body)
 	urls := Processor.Findurl(body, page.URL)
-	fmt.Printf("%s发现内链%d个，外链%d个\n", page.URL, len(urls[0]), len(urls[1]))
+	logger.PF(logger.LINFO, "<Spider>[%s]%s发现内链%d个，外链%d个", s.Host, page.URL, len(urls[0]), len(urls[1]))
 	for _, u := range urls[1] {
 		page.ExtURLList = append(page.ExtURLList, u.String())
 	}
@@ -44,7 +45,6 @@ func (s *Spider) Processor(page *dao.Page, body []byte) {
 
 func (s *Spider) AddUrlbypage(URL []*dao.Page) {
 	for _, v := range URL {
-		//s.Pagechan <- v
 		s.scheduler.Submit(v)
 	}
 }
@@ -55,6 +55,7 @@ func (s *Spider) AddUrlbyURL(URL []*url.URL) []*dao.Page {
 	if err != nil {
 		//todo
 	}
+	logger.PF(logger.LINFO, "<Spider>[%s]添加新URL %d 个", s.Host, len(pages))
 	return pages
 }
 
@@ -64,7 +65,7 @@ func (s *Spider) AddNewPage(urls []*url.URL) ([]*dao.Page, error) {
 	for _, url := range urls {
 		urlstr := url.String()
 		if len(urlstr) <= len(url.Scheme)+3 {
-			fmt.Println("异常连接：", urlstr)
+			logger.PF(logger.LERROR, "<Spider>发现异常连接%s", urlstr)
 			continue
 		}
 		strurl := url.String()[len(url.Scheme)+3:]

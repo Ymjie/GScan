@@ -86,7 +86,7 @@ func (h *HttpSpider) GetUrl(page *dao.Page) ([]byte, error) {
 			break
 		}
 	}
-	request.Header.Add("Origin", page.URL)
+	//request.Header.Add("Origin", page.URL)
 	request.Header.Add("Referer", page.URL)
 	response, err := h.c.Do(request)
 	if err != nil {
@@ -96,19 +96,17 @@ func (h *HttpSpider) GetUrl(page *dao.Page) ([]byte, error) {
 	page.Code = uint(response.StatusCode)
 	page.Type = response.Header.Get("Content-Type")
 	page.Length = response.ContentLength
-	location, err := response.Location()
-	if err == nil {
-		page.URL = location.String()
-	}
-	if !(strings.Contains(page.Type, "text")) {
+	page.URL = response.Request.URL.String()
+
+	if page.Code == 200 && !(strings.Contains(page.Type, "text")) {
+		if page.Length >= 1024*1024*5 { //大于5M
+			return nil, errors.New("not text data and Length大于5M")
+		}
 		_, err := io.ReadAll(response.Body)
 		if err != nil {
 			return nil, err
 		}
 		return nil, errors.New("not text data")
-	}
-	if page.Length >= 1024*1024*5 { //大于5M
-		return nil, errors.New("Length大于5M")
 	}
 	all, _ := io.ReadAll(response.Body)
 	return all, nil

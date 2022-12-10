@@ -99,7 +99,6 @@ func OutPutRes(jobid uint, DAO dao.IDAO) string {
 }
 
 func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
-
 	f := excelize.NewFile()
 	defer func() {
 		// Close the spreadsheet.

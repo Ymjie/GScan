@@ -1,8 +1,11 @@
-name: WebTreeScan
-version: 0.1
+Name: WebTreeScan
+Version: 0.2
 ResultPath: ./result
-
+LogPath: ./log
+LogLevel: 1 # 日志记录等级，DEBUG:1 WARN:2 INFO:3 ERROR:4 FATAL:5
+LogPrintingLevel: 1 #日志打印等级
 SpiderMaxNum: 5 #最大爬虫数量
+whitelistFile : whitelist.txt #白名单，白名单不做内容分析
 Spider:
   page_analyze_timeout_second: 300  # 页面分析超时时间，单位秒，暂时无效 功能没加><
   retry: 0                          # 页面访问失败后的重试次数
@@ -17,4 +20,3 @@ Spider:
 
 Downloader: #自动下载功能没写
   Enable: true
-whitelistFile : whitelist.txt

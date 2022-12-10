@@ -50,7 +50,7 @@ func EXLinkPF(page *dao.Page, data []byte) (*dao.ProcessResult, error) { //exter
 		Type:   "外部链接",
 		PageID: page.ID,
 	}
-	if page.External {
+	if page.External && strings.Contains(page.Type, "text") {
 		bytes, _ := json.Marshal(&struct {
 			Code  uint   `json:"状态码"`
 			Title string `json:"标题"`

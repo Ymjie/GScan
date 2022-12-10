@@ -1,13 +1,16 @@
 package config
 
 type Config struct {
-	Version       float64    `yaml:"version"`
-	ResultPath    string     `yaml:"ResultPath"`
-	SpiderMaxNum  int        `yaml:"SpiderMaxNum"`
-	Spider        Spider     `yaml:"Spider"`
-	Downloader    Downloader `yaml:"Downloader"`
-	Name          string     `yaml:"name"`
-	WhitelistFile string     `yaml:"whitelistFile"`
+	Version          float64    `yaml:"Version"`
+	ResultPath       string     `yaml:"ResultPath"`
+	SpiderMaxNum     int        `yaml:"SpiderMaxNum"`
+	Spider           Spider     `yaml:"Spider"`
+	Downloader       Downloader `yaml:"Downloader"`
+	Name             string     `yaml:"Name"`
+	WhitelistFile    string     `yaml:"whitelistFile"`
+	LogPath          string     `yaml:"LogPath"`
+	LogLevel         int64      `yaml:"LogLevel"`
+	LogPrintingLevel int64      `yaml:"LogPrintingLevel"`
 }
 
 type Httpspider struct {

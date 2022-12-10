@@ -6,13 +6,13 @@ import (
 	"GScan/infoscan/service/Crawler/Processor"
 	"GScan/pkg"
 	"GScan/pkg/bloom"
+	"GScan/pkg/logger"
 	"context"
-	"fmt"
 	"net/url"
 )
 
 type Spider struct {
-	MainURL       string
+	MainURL       *url.URL
 	Host          string
 	JobID         uint
 	Reqer         Requester
@@ -42,25 +42,19 @@ func NewSpider(config *config.Spider, jobid uint, db dao.IDAO) *Spider {
 	return s
 }
 func (s *Spider) Run(ctx context.Context) error {
-	fmt.Printf("%s：开始运行\n", s.MainURL)
+	logger.PF(logger.LINFO, "<Spider>[%s]开始运行", s.Host)
 	s.runWK(ctx, s.config.Threads)
-	fmt.Printf("%s：结束\n", s.MainURL)
+	logger.PF(logger.LINFO, "<Spider>[%s]结束", s.Host)
 	return nil
 }
 func (s *Spider) SetReqer(r Requester) *Spider {
 	s.Reqer = r
 	return s
 }
-func (s *Spider) SetMainUrl(murl string) *Spider {
+func (s *Spider) SetMainUrl(murl *url.URL) *Spider {
 	s.MainURL = murl
-	parse, err := url.Parse(murl)
-	if err != nil {
-		//todo 错误处理
-		fmt.Printf("Spider添加URL:%s 失败，跳过,%s\n", murl, err.Error())
-		return s
-	}
-	s.Host = parse.Host
-	pages := s.AddUrlbyURL([]*url.URL{parse})
+	s.Host = s.MainURL.Host
+	pages := s.AddUrlbyURL([]*url.URL{murl})
 	s.AddUrlbypage(pages)
 	return s
 }

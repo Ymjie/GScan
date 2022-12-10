@@ -213,7 +213,7 @@ func Unique(intSlice []string) []string {
 }
 func Gettitle(data []byte) string {
 	body := pkg.Bytes2String(data)
-	re := regexp.MustCompile(`(?i)<title>([\s\S]+?)</title>`)
+	re := regexp.MustCompile(`(?i)<title>(.*?)</title>`)
 	title_name := re.FindAllStringSubmatch(body, 1)
 	if len(title_name) == 0 {
 		return ""

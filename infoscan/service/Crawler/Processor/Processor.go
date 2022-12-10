@@ -2,6 +2,7 @@ package Processor
 
 import (
 	"GScan/infoscan/dao"
+	"GScan/pkg/logger"
 	"bufio"
 	"context"
 	"log"
@@ -62,6 +63,7 @@ func (p *DataProcessor) Handler(ctx context.Context, page *dao.Page, data []byte
 			continue
 		}
 		result.JobID = p.JobID
+		logger.PF(logger.LINFO, "<DataProcessor>[%d][%s]%s", result.PageID, result.Type, result.Data)
 		p.IProcessorDAO.AddResult(result)
 	}
 

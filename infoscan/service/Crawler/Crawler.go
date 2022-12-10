@@ -8,8 +8,8 @@ import (
 	"GScan/infoscan/service/Crawler/Spider/HttpSpider"
 	"GScan/pkg"
 	"GScan/pkg/bloom"
+	"GScan/pkg/logger"
 	"context"
-	"fmt"
 	"net/url"
 )
 
@@ -46,23 +46,24 @@ func (c *CrawlerJob) init() {
 	for _, u := range c.Urls {
 		parse, err := url.Parse(u)
 		if err != nil {
-			fmt.Printf("Spider添加URL:%s 失败，跳过,%s\n", u, err.Error())
+			logger.PF(logger.LERROR, "Spider添加URL:%s 失败，跳过,%s\n", u, err.Error())
+			continue
 		}
 		if v, ok := c.Spiders[parse.Host]; ok {
 			pages := v.AddUrlbyURL([]*url.URL{parse})
 			v.AddUrlbypage(pages)
 			continue
 		}
-		spider := c.createSpider(u)
+		spider := c.createSpider(parse)
 		c.Spiders[parse.Host] = spider
 		c.Scheduler.Submit(parse.Host)
 	}
 
 }
-func (c *CrawlerJob) Run(ctx context.Context, max int) {
+func (c *CrawlerJob) Run(ctx context.Context) {
 	c.init()
 	cancel, cancelFunc := context.WithCancel(ctx)
-	for i := 0; i < max; i++ {
+	for i := 0; i < c.config.SpiderMaxNum; i++ {
 		go func() {
 			workerChan := c.Scheduler.WorkerChan()
 			for {
@@ -83,8 +84,7 @@ func (c *CrawlerJob) Run(ctx context.Context, max int) {
 		}()
 	}
 	<-cancel.Done()
-	fmt.Println("扫描分析结束")
-
+	logger.PF(logger.LINFO, "扫描分析结束")
 }
 func (c *CrawlerJob) CallbackFunc(page *dao.Page, body []byte) {
 	pgurl, _ := url.Parse(page.URL) //page.URL 绝对是正确的
@@ -96,7 +96,7 @@ func (c *CrawlerJob) CallbackFunc(page *dao.Page, body []byte) {
 
 }
 
-func (c *CrawlerJob) createSpider(URL string) *Spider.Spider {
+func (c *CrawlerJob) createSpider(URL *url.URL) *Spider.Spider {
 	spider :=
 		Spider.NewSpider(&c.config.Spider, c.Job.ID, c.DAO).
 			SetFilter(c.BloomFilter).
