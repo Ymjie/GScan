@@ -2,7 +2,7 @@ package Processor
 
 import (
 	"GScan/pkg"
-	"fmt"
+	"GScan/pkg/logger"
 	"html"
 	"net/url"
 	"path/filepath"
@@ -44,8 +44,8 @@ func HtmlFind(data string) []string {
 }
 
 func PageFind(bytesource []byte) []string {
-	bytesource = regexp.MustCompile(`(?si)<script.*?<\/script>`).ReplaceAll(bytesource, []byte(" "))
-	bytesource = regexp.MustCompile(`(?si)<style.*?<\/style>`).ReplaceAll(bytesource, []byte(" "))
+	bytesource = regexp.MustCompile(`(?si)<script.*?</script>`).ReplaceAll(bytesource, []byte(" "))
+	bytesource = regexp.MustCompile(`(?si)<style.*?</style>`).ReplaceAll(bytesource, []byte(" "))
 	source := pkg.Bytes2String(regexp.MustCompile("(?si)<.*?>").ReplaceAll(bytesource, []byte(" ")))
 	source = html.UnescapeString(source)
 	var links []string
@@ -101,7 +101,7 @@ func PageFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 				extrls = append(extrls, up)
 			}
 		} else {
-			fmt.Printf("页面内容中的URL:%s 处理失败：%s,来自页面：%s\n", u, err.Error(), iurl)
+			logger.PF(logger.LERROR, "<URLFinder>页面内容中的URL:%s 处理失败：%s,来自页面：%s", u, err.Error(), iurl)
 		}
 	}
 	return [][]*url.URL{urls, extrls}
@@ -126,7 +126,7 @@ func HtmlFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 		}
 		parserulfunc := func(urlstr string, sliec *[]*url.URL) {
 			if u, err := url.Parse(urlstr); err != nil {
-				fmt.Printf("Html标签属性中的URL:%s 处理失败：%s,来自页面：%s\n", urlstr, err.Error(), iurl)
+				logger.PF(logger.LERROR, "<URLFinder>Html标签属性中的URL:%s 处理失败：%s,来自页面：%s", urlstr, err.Error(), iurl)
 			} else {
 				*sliec = append(*sliec, u)
 			}

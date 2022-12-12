@@ -68,10 +68,12 @@ func (D *DAO) AddResult(result *dao.ProcessResult) {
 	D.Mutex.Unlock()
 }
 func (D *DAO) GetResult(jobid uint) []dao.ProcessResult {
+	D.Mutex.Lock()
 	var rr []dao.ProcessResult
 	D.db.Where(&dao.ProcessResult{
 		JobID: jobid,
 	}).Find(&rr)
+	D.Mutex.Unlock()
 	return rr
 }
 func (D *DAO) WebTreeAdd(jobID uint, FPID uint, subID []uint) {
@@ -93,6 +95,7 @@ func (D *DAO) WebTreeAdd(jobID uint, FPID uint, subID []uint) {
 }
 
 func (D *DAO) WebTreeGet(jobID uint, id uint) ([]uint, error) {
+	D.Mutex.Lock()
 	var res dao.WebTree
 	err := D.db.Where(dao.WebTree{
 		JobID:  jobID,
@@ -101,6 +104,7 @@ func (D *DAO) WebTreeGet(jobID uint, id uint) ([]uint, error) {
 	if err != nil {
 		return nil, err
 	}
+	D.Mutex.Unlock()
 	return res.FiD, nil
 }
 func (D *DAO) WebPageLink(jobID uint, id uint) [][]uint {
@@ -110,10 +114,12 @@ func (D *DAO) WebPageLink(jobID uint, id uint) [][]uint {
 }
 
 func (D *DAO) AddJob(name string) *dao.Job {
+	D.Mutex.Lock()
 	job := dao.Job{
 		Name: name,
 	}
 	D.db.Create(&job)
+	D.Mutex.Unlock()
 	return &job
 }
 

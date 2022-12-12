@@ -46,7 +46,7 @@ func (c *CrawlerJob) init() {
 	for _, u := range c.Urls {
 		parse, err := url.Parse(u)
 		if err != nil {
-			logger.PF(logger.LERROR, "Spider添加URL:%s 失败，跳过,%s\n", u, err.Error())
+			logger.PF(logger.LERROR, "<Crawler>[JobID:%d]Spider添加URL:%s 失败，跳过,%s", c.ID, u, err.Error())
 			continue
 		}
 		if v, ok := c.Spiders[parse.Host]; ok {
@@ -71,6 +71,7 @@ func (c *CrawlerJob) Run(ctx context.Context) {
 				select {
 				case host := <-workerChan:
 					err := c.Spiders[host].Run(ctx)
+					logger.PF(logger.LINFO, "<Crawler>[JobID:%d]启动Spider[%s]", c.ID, host)
 					if err != nil {
 						// 我觉得 这地方不会出错
 					}
@@ -84,7 +85,7 @@ func (c *CrawlerJob) Run(ctx context.Context) {
 		}()
 	}
 	<-cancel.Done()
-	logger.PF(logger.LINFO, "扫描分析结束")
+	logger.PF(logger.LINFO, "<Crawler>[JobID:%d]任务结束", c.ID)
 }
 func (c *CrawlerJob) CallbackFunc(page *dao.Page, body []byte) {
 	pgurl, _ := url.Parse(page.URL) //page.URL 绝对是正确的

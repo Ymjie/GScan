@@ -17,6 +17,8 @@ func (s *Spider) Processor(page *dao.Page, body []byte) {
 		s.DAO.UpdatePage(page)
 		s.CallbackFunc(page, body)
 		return
+	} else {
+		page.External = false
 	}
 	if page.Status != "Success" {
 		if strings.Contains(page.Error, "timeout") {
@@ -62,19 +64,19 @@ func (s *Spider) AddUrlbyURL(URL []*url.URL) []*dao.Page {
 func (s *Spider) AddNewPage(urls []*url.URL) ([]*dao.Page, error) {
 	//todo 完善异常处理
 	var pgs []*dao.Page
-	for _, url := range urls {
-		urlstr := url.String()
-		if len(urlstr) <= len(url.Scheme)+3 {
+	for _, surl := range urls {
+		urlstr := surl.String()
+		if len(urlstr) <= len(surl.Scheme)+3 {
 			logger.PF(logger.LERROR, "<Spider>发现异常连接%s", urlstr)
 			continue
 		}
-		strurl := url.String()[len(url.Scheme)+3:]
+		strurl := surl.String()[len(surl.Scheme)+3:]
 		if ok := s.BloomFilter.TestString(strurl); !ok {
 			s.BloomFilter.AddString(strurl)
 			pg := &dao.Page{
 				JobID:      s.JobID,
 				Status:     "未访问",
-				URL:        url.String(),
+				URL:        surl.String(),
 				ExtURLList: []string{},
 			}
 			pgs = append(pgs, pg)
