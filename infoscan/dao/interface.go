@@ -27,4 +27,5 @@ type IWebTreeDAO interface {
 
 type IJobDAO interface {
 	AddJob(name string) *Job
+	Getjobs() []*Job
 }

@@ -18,8 +18,15 @@
 **使用方法：**
 1. 编辑配置文件、调整`whitelist.txt`
 2. 将目标网站保存到`url.txt`
-3. 运行exe
-4. 任务完成后，结果保存为`Excel`文件
+3. 运行infoscan.exe (推荐在命令行中运行)
+```
+InfoScan
+
+Usage:
+   infoscan.exe
+   infoscan.exe ls               #列出所有任务
+   infoscan.exe export <JobID>   #导出任务结果
+```
 
 _如有需要可自行编译Linux版本_
 

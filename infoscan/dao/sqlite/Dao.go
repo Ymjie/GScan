@@ -139,3 +139,11 @@ func (D *DAO) GetOnePages(page *dao.Page) *dao.Page {
 	D.Mutex.Unlock()
 	return rp
 }
+
+func (D *DAO) Getjobs() []*dao.Job {
+	D.Mutex.Lock()
+	var jobs []*dao.Job
+	D.db.Find(&jobs)
+	D.Mutex.Unlock()
+	return jobs
+}

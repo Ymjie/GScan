@@ -9,6 +9,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 	"html"
+	"log"
 	"strings"
 )
 
@@ -100,6 +101,10 @@ func OutPutRes(jobid uint, DAO dao.IDAO) string {
 }
 
 func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
+	result := DAO.GetResult(jobid)
+	if len(result) == 0 {
+		log.Fatalln("结果为空！")
+	}
 	logger.PF(logger.LINFO, "<Out2Excel>正在输出结果")
 	f := excelize.NewFile()
 	defer func() {
@@ -108,7 +113,7 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 			fmt.Println(err)
 		}
 	}()
-	result := DAO.GetResult(jobid)
+
 	for _, r := range result {
 		a := []string{}
 		if f.GetSheetIndex(r.Type) == -1 {
