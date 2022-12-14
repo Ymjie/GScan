@@ -96,8 +96,10 @@ func (h *HttpSpider) GetUrl(page *dao.Page) ([]byte, error) {
 	page.Code = uint(response.StatusCode)
 	page.Type = response.Header.Get("Content-Type")
 	page.Length = response.ContentLength
-	page.URL = response.Request.URL.String()
-
+	_, err = url.Parse(response.Request.URL.String())
+	if err == nil {
+		page.URL = response.Request.URL.String()
+	}
 	if page.Code == 200 && !(strings.Contains(page.Type, "text")) {
 		if page.Length >= 1024*1024*5 { //大于5M
 			return nil, errors.New("not text data and Length大于5M")

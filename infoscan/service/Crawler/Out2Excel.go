@@ -2,6 +2,7 @@ package Crawler
 
 import (
 	"GScan/infoscan/dao"
+	"GScan/pkg/logger"
 	"encoding/json"
 	"fmt"
 	"github.com/axgle/mahonia"
@@ -99,6 +100,7 @@ func OutPutRes(jobid uint, DAO dao.IDAO) string {
 }
 
 func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
+	logger.PF(logger.LINFO, "<Out2Excel>正在输出结果")
 	f := excelize.NewFile()
 	defer func() {
 		// Close the spreadsheet.
@@ -174,5 +176,5 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Println("输出结果完成")
+	logger.PF(logger.LINFO, "<Out2Excel>输出结果完成，%s", filename)
 }

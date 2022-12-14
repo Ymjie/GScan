@@ -20,8 +20,8 @@ var Config *config.Config
 func main() {
 	jobname, jobID := api.StartCrawlerJob(DB, Config)
 	Crawler.Out2Excel(jobID, DB, filepath.Join(Config.ResultPath, jobname+".xlsx"))
+	//Crawler.Out2Excel(1, DB, "1.xlsx")
 }
-
 func init() {
 	//配置文件读取
 	c, err := config.LoadConfig("config.yml")

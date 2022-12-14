@@ -11,7 +11,11 @@ import (
 
 func (s *Spider) Processor(page *dao.Page, body []byte) {
 	page.Title = Processor.Gettitle(body)
-	parse, _ := url.Parse(page.URL)
+	parse, err := url.Parse(page.URL)
+	if err != nil {
+		logger.PF(logger.LERROR, "<Spider>[%s]PageID:%d URL错误,%s", page.ID, s.Host, err.Error())
+		return
+	}
 	if parse.Host != s.Host {
 		page.External = true
 		s.DAO.UpdatePage(page)
@@ -31,7 +35,7 @@ func (s *Spider) Processor(page *dao.Page, body []byte) {
 		return
 	}
 	urls := Processor.Findurl(body, page.URL)
-	logger.PF(logger.LINFO, "<Spider>[%s]%s发现内链%d个，外链%d个", s.Host, page.URL, len(urls[0]), len(urls[1]))
+	logger.PF(logger.LDEBUG, "<Spider>[%s]%s发现内链%d个，外链%d个", s.Host, page.URL, len(urls[0]), len(urls[1]))
 	for _, u := range urls[1] {
 		page.ExtURLList = append(page.ExtURLList, u.String())
 	}
@@ -57,7 +61,7 @@ func (s *Spider) AddUrlbyURL(URL []*url.URL) []*dao.Page {
 	if err != nil {
 		//todo
 	}
-	logger.PF(logger.LINFO, "<Spider>[%s]添加新URL %d 个", s.Host, len(pages))
+	logger.PF(logger.LDEBUG, "<Spider>[%s]添加新URL %d 个", s.Host, len(pages))
 	return pages
 }
 

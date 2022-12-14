@@ -1,19 +1,28 @@
 package pkg
 
+import "sync/atomic"
+
 type QueueScheduler[T any] struct {
 	requestChan chan T
 	workerChan  chan chan T
 	status      bool
+	runningNum  int32
 }
 
 func (s *QueueScheduler[T]) Init() {
 	s.workerChan = make(chan chan T)
 	s.requestChan = make(chan T)
+	s.runningNum = 0
 }
 func (s *QueueScheduler[T]) WorkerChan() chan T {
 	return make(chan T)
 }
-
+func (s *QueueScheduler[T]) Complete() {
+	atomic.AddInt32(&s.runningNum, -1)
+}
+func (s *QueueScheduler[T]) GetrunningNum() int32 {
+	return atomic.LoadInt32(&s.runningNum)
+}
 func (s *QueueScheduler[T]) Submit(r T) {
 	s.requestChan <- r
 }
@@ -45,6 +54,7 @@ func (s *QueueScheduler[T]) Run() {
 				workerQ = append(workerQ, w)
 			// 要么就将 Request 发送给 Worker 去工作
 			case activeWorker <- activeRequest:
+				atomic.AddInt32(&s.runningNum, 1)
 				requestQ = requestQ[1:]
 				workerQ = workerQ[1:]
 				s.status = len(requestQ) != 0

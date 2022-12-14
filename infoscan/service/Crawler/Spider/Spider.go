@@ -9,6 +9,7 @@ import (
 	"GScan/pkg/logger"
 	"context"
 	"net/url"
+	"sync"
 )
 
 type Spider struct {
@@ -41,11 +42,10 @@ func NewSpider(config *config.Spider, jobid uint, db dao.IDAO) *Spider {
 	s.scheduler.Run()
 	return s
 }
-func (s *Spider) Run(ctx context.Context) error {
+func (s *Spider) Run(ctx context.Context, wg *sync.WaitGroup) {
 	logger.PF(logger.LINFO, "<Spider>[%s]开始运行", s.Host)
-	s.runWK(ctx, s.config.Threads)
+	s.runWK(ctx, wg, s.config.Threads)
 	logger.PF(logger.LINFO, "<Spider>[%s]结束", s.Host)
-	return nil
 }
 func (s *Spider) SetReqer(r Requester) *Spider {
 	s.Reqer = r

@@ -18,5 +18,5 @@ Spider:
     navigate_timeout_second: 5      #请求超时时间
     proxy: ''                       # 代理配置
 
-Downloader: #自动下载功能没写
+Downloader: #自动下载功能没写，也没必要写
   Enable: true

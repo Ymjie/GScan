@@ -31,11 +31,11 @@ type MyLogger struct {
 
 func init() {
 	Logger = &MyLogger{
-		debugLogger: log.New(os.Stdout, "[DEBUG] ", log.LstdFlags|log.Lmsgprefix),
-		warnLogger:  log.New(os.Stdout, "[WARN] ", log.LstdFlags|log.Lmsgprefix),
-		infoLogger:  log.New(os.Stdout, "[INFO] ", log.LstdFlags|log.Lmsgprefix),
-		errLogger:   log.New(os.Stdout, "[ERROR] ", log.LstdFlags|log.Lmsgprefix),
-		fatalLogger: log.New(os.Stdout, "[FATAL] ", log.LstdFlags|log.Lmsgprefix),
+		debugLogger: log.New(os.Stdout, "[DEBUG]", log.LstdFlags|log.Lmsgprefix),
+		warnLogger:  log.New(os.Stdout, "[WARN]", log.LstdFlags|log.Lmsgprefix),
+		infoLogger:  log.New(os.Stdout, "[INFO]", log.LstdFlags|log.Lmsgprefix),
+		errLogger:   log.New(os.Stdout, "[ERROR]", log.LstdFlags|log.Lmsgprefix),
+		fatalLogger: log.New(os.Stdout, "[FATAL]", log.LstdFlags|log.Lmsgprefix),
 	}
 }
 

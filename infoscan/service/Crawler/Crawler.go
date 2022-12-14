@@ -11,6 +11,7 @@ import (
 	"GScan/pkg/logger"
 	"context"
 	"net/url"
+	"sync"
 )
 
 type CrawlerJob struct {
@@ -62,21 +63,25 @@ func (c *CrawlerJob) init() {
 }
 func (c *CrawlerJob) Run(ctx context.Context) {
 	c.init()
+	var wg sync.WaitGroup
 	cancel, cancelFunc := context.WithCancel(ctx)
 	for i := 0; i < c.config.SpiderMaxNum; i++ {
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			workerChan := c.Scheduler.WorkerChan()
 			for {
 				c.Scheduler.WorkerReady(workerChan)
 				select {
 				case host := <-workerChan:
-					err := c.Spiders[host].Run(ctx)
 					logger.PF(logger.LINFO, "<Crawler>[JobID:%d]启动Spider[%s]", c.ID, host)
-					if err != nil {
-						// 我觉得 这地方不会出错
-					}
+					c.Spiders[host].Run(cancel, &wg)
+					c.Scheduler.Complete()
 					if !c.Scheduler.Working() {
-						cancelFunc()
+						logger.PF(logger.LINFO, "<Crawler>[JobID:%d]即将完成，等待结束。", c.ID)
+						if c.Scheduler.GetrunningNum() == 0 {
+							cancelFunc()
+						}
 					}
 				case <-cancel.Done():
 					return
@@ -84,12 +89,13 @@ func (c *CrawlerJob) Run(ctx context.Context) {
 			}
 		}()
 	}
-	<-cancel.Done()
+	wg.Wait()
 	logger.PF(logger.LINFO, "<Crawler>[JobID:%d]任务结束", c.ID)
 }
 func (c *CrawlerJob) CallbackFunc(page *dao.Page, body []byte) {
 	pgurl, _ := url.Parse(page.URL) //page.URL 绝对是正确的
 	if s, ok := c.Spiders[pgurl.Host]; ok {
+		logger.PF(logger.LDEBUG, "<Crawler>[JobID:%d]CallbackFuncAddUrl[%s]To Spider[%s]", c.ID, page.URL, s.Host)
 		s.Processor(page, body)
 	} else {
 		//todo ?其实不用做
