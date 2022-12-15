@@ -140,7 +140,8 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 		}
 	}
 	id := map[string]int{}
-	for _, r := range result {
+	for k, r := range result {
+		fmt.Printf("<Out2Excel>正在输出第%d个结果\r", k)
 		//raw := map[string]interface{}{}
 		if _, ok := id[r.Type]; !ok {
 			id[r.Type] = 2

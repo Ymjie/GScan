@@ -96,6 +96,7 @@ func (D *DAO) WebTreeAdd(jobID uint, FPID uint, subID []uint) {
 
 func (D *DAO) WebTreeGet(jobID uint, id uint) ([]uint, error) {
 	D.Mutex.Lock()
+	defer D.Mutex.Unlock()
 	var res dao.WebTree
 	err := D.db.Where(dao.WebTree{
 		JobID:  jobID,
@@ -104,7 +105,7 @@ func (D *DAO) WebTreeGet(jobID uint, id uint) ([]uint, error) {
 	if err != nil {
 		return nil, err
 	}
-	D.Mutex.Unlock()
+
 	return res.FiD, nil
 }
 func (D *DAO) WebPageLink(jobID uint, id uint) [][]uint {

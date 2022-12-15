@@ -1,5 +1,5 @@
-Name: WebTreeScan
-Version: 0.2
+Name: InfoScan
+Version: 0.4
 ResultPath: ./result
 LogPath: ./log
 LogLevel: 1 # 日志记录等级，DEBUG:1 WARN:2 INFO:3 ERROR:4 FATAL:5
