@@ -3,11 +3,13 @@ package Processor
 import (
 	"GScan/pkg"
 	"GScan/pkg/logger"
+	"golang.org/x/text/encoding/simplifiedchinese"
 	"html"
 	"net/url"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 )
 
 var (
@@ -218,8 +220,15 @@ func Gettitle(data []byte) string {
 	if len(title_name) == 0 {
 		return ""
 	}
-	return html.UnescapeString(title_name[0][1])
-
+	title := html.UnescapeString(title_name[0][1])
+	//return title
+	if isGBK([]byte(title)) {
+		s, err := simplifiedchinese.GBK.NewDecoder().String(title)
+		if err == nil {
+			return s
+		}
+	}
+	return title
 }
 func absUrl(currUrl, baseUrl string) string {
 	urlInfo, err := url.Parse(currUrl)
@@ -253,4 +262,31 @@ func absUrl(currUrl, baseUrl string) string {
 		return u + clean + "?" + urlInfo.RawQuery
 	}
 	return u + clean
+}
+func isGBK(data []byte) bool {
+	if utf8.Valid(data) {
+		return false
+	}
+	length := len(data)
+	var i int = 0
+	for i < length {
+		if data[i] <= 0x7f {
+			//编码0~127,只有一个字节的编码，兼容ASCII码
+			i++
+			continue
+		} else {
+			//大于127的使用双字节编码，落在gbk编码范围内的字符
+			if data[i] >= 0x81 &&
+				data[i] <= 0xfe &&
+				data[i+1] >= 0x40 &&
+				data[i+1] <= 0xfe &&
+				data[i+1] != 0xf7 {
+				i += 2
+				continue
+			} else {
+				return false
+			}
+		}
+	}
+	return true
 }

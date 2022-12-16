@@ -8,7 +8,7 @@ SpiderMaxNum: 5 #最大爬虫数量
 whitelistFile : whitelist.txt #白名单，白名单不做内容分析
 Spider:
   page_analyze_timeout_second: 300  # 页面分析超时时间，单位秒，暂时无效 功能没加><
-  retry: 0                          # 页面访问失败后的重试次数
+  retry: 3                          # 内链页面访问超时后的重试次数
   Threads: 5                        # Spider请求线程数
                                     #有打算写 无头浏览器扫描方式
   Httpspider:

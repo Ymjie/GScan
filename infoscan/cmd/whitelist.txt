@@ -36,3 +36,10 @@ microsoft.com
 .foxitsoftware.cn
 .icourse163.org
 jb.mil.cn
+ifeng.com
+sina.cn
+sciencedirect.com
+baike.com
+dzwww.com
+e23.cn
+dzng.com

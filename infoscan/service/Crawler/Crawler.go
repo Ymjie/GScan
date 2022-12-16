@@ -36,7 +36,7 @@ func NewCrawlerJob(config *config.Config, db dao.IDAO, name string, urls []strin
 		config: config,
 		Job:    db.AddJob(name),
 		crawler: crawler{
-			BloomFilter: bloom.New(117*1024, 7, true),
+			BloomFilter: bloom.New(175.50*1024*8, 10, true), //10W数据，错误率0.1%
 			Spiders:     map[string]*Spider.Spider{},
 			Urls:        urls,
 			Scheduler:   s,

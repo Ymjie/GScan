@@ -25,8 +25,8 @@ func (s *Spider) Processor(page *dao.Page, body []byte) {
 		page.External = false
 	}
 	if page.Status != "Success" {
-		if strings.Contains(page.Error, "timeout") {
-			if page.ErrorNum < s.config.Retry {
+		if (!page.External) && strings.Contains(strings.ToLower(page.Error), "timeout") { //内链页面重试
+			if (page.ErrorNum - 1) < s.config.Retry {
 				s.AddUrlbypage([]*dao.Page{page})
 			}
 		}
