@@ -68,5 +68,4 @@ func (s *Spider) datapress(ctx context.Context, page *dao.Page, data []byte) {
 	s.DataProcessor.Handler(ctx, page, data)
 	page = nil
 	data = nil //触发GC
-	//runtime.GC()
 }
