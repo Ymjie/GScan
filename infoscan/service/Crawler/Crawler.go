@@ -50,6 +50,10 @@ func (c *CrawlerJob) init() {
 			logger.PF(logger.LERROR, "<Crawler>[JobID:%d]Spider添加URL:%s 失败，跳过,%s", c.ID, u, err.Error())
 			continue
 		}
+		if parse.Host == "" {
+			logger.PF(logger.LERROR, "<Crawler>[JobID:%d]Spider添加URL:%s 失败，跳过", c.ID, u)
+			continue
+		}
 		if v, ok := c.Spiders[parse.Host]; ok {
 			pages := v.AddUrlbyURL([]*url.URL{parse})
 			v.AddUrlbypage(pages)
@@ -77,7 +81,7 @@ func (c *CrawlerJob) Run(ctx context.Context) {
 					logger.PF(logger.LINFO, "<Crawler>[JobID:%d]启动Spider[%s]", c.ID, host)
 					c.Spiders[host].Run(cancel, &wg)
 					c.Scheduler.Complete()
-					if !c.Scheduler.Working() {
+					if c.Scheduler.RequestNum() == 0 {
 						logger.PF(logger.LINFO, "<Crawler>[JobID:%d]即将完成，等待结束。", c.ID)
 						if c.Scheduler.GetrunningNum() == 0 {
 							cancelFunc()

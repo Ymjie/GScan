@@ -129,6 +129,8 @@ func HtmlFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 		parserulfunc := func(urlstr string, sliec *[]*url.URL) {
 			if u, err := url.Parse(urlstr); err != nil {
 				logger.PF(logger.LERROR, "<URLFinder>Html标签属性中的URL:%s 处理失败：%s,来自页面：%s", urlstr, err.Error(), iurl)
+			} else if u.Host == "" {
+				logger.PF(logger.LERROR, "<URLFinder>Html标签属性中的URL:%s 处理失败,来自页面：%s", urlstr, iurl)
 			} else {
 				*sliec = append(*sliec, u)
 			}
@@ -269,6 +271,9 @@ func isGBK(data []byte) bool {
 	}
 	length := len(data)
 	var i int = 0
+	if length%2 != 0 {
+		return false
+	}
 	for i < length {
 		if data[i] <= 0x7f {
 			//编码0~127,只有一个字节的编码，兼容ASCII码

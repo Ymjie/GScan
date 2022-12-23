@@ -5,7 +5,7 @@ import "sync/atomic"
 type QueueScheduler[T any] struct {
 	requestChan chan T
 	workerChan  chan chan T
-	status      bool
+	requestNum  int32
 	runningNum  int32
 }
 
@@ -30,8 +30,8 @@ func (s *QueueScheduler[T]) Submit(r T) {
 func (s *QueueScheduler[T]) WorkerReady(w chan T) {
 	s.workerChan <- w
 }
-func (s *QueueScheduler[T]) Working() bool {
-	return s.status
+func (s *QueueScheduler[T]) RequestNum() int32 {
+	return atomic.LoadInt32(&s.requestNum)
 }
 func (s *QueueScheduler[T]) Run() {
 	go func() {
@@ -48,7 +48,7 @@ func (s *QueueScheduler[T]) Run() {
 			// 有 Request 来，就存到 Request 队列中
 			case r := <-s.requestChan:
 				requestQ = append(requestQ, r)
-				s.status = len(requestQ) != 0
+				atomic.StoreInt32(&s.requestNum, int32(len(requestQ)))
 			// 有准备好的 Worker 来，就存到 Worker 队列中
 			case w := <-s.workerChan:
 				workerQ = append(workerQ, w)
@@ -57,7 +57,7 @@ func (s *QueueScheduler[T]) Run() {
 				atomic.AddInt32(&s.runningNum, 1)
 				requestQ = requestQ[1:]
 				workerQ = workerQ[1:]
-				s.status = len(requestQ) != 0
+				atomic.StoreInt32(&s.requestNum, int32(len(requestQ)))
 			}
 
 		}

@@ -45,19 +45,20 @@ func (s *Spider) worker(ctx context.Context, ctxfunc context.CancelFunc, wg *syn
 			}
 			s.datapress(ctx, page, bytes)
 			s.scheduler.Complete()
-			if !s.scheduler.Working() && s.scheduler.GetrunningNum() == 0 {
-				if ctxfunc != nil {
-					ctxfunc()
-				}
-			}
 		case <-ctx.Done():
+			go func() {
+				if num, ok := <-workerChan; ok { //坚守到最后一刻，泪目( Ĭ ^ Ĭ )
+					s.scheduler.Submit(num)
+					close(workerChan)
+				}
+			}()
 			return
-			//if s.scheduler.Working() {
-			//	logger.PF(logger.LDEBUG, "<Spider>[%s]还有未完成任务，请等待。", s.Host)
-			//	time.Sleep(2 * time.Second)
-			//} else {
-			//	return
-			//}
+		}
+		if s.scheduler.RequestNum() == 0 && s.scheduler.GetrunningNum() == 0 {
+			if ctxfunc != nil {
+				ctxfunc()
+			}
+			return
 		}
 	}
 
