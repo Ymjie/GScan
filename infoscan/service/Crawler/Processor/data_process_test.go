@@ -2,6 +2,8 @@ package Processor
 
 import (
 	"golang.org/x/text/encoding/simplifiedchinese"
+	"io"
+	"net/http"
 	"net/url"
 	"reflect"
 	"testing"
@@ -417,6 +419,8 @@ func Test_absUrl(t *testing.T) {
 
 func TestGettitle(t *testing.T) {
 	s, _ := simplifiedchinese.GBK.NewEncoder().String("安大大")
+	get, _ := http.Get("https://www.sogou.com/")
+	all, _ := io.ReadAll(get.Body)
 	type args struct {
 		body string
 	}
@@ -425,6 +429,7 @@ func TestGettitle(t *testing.T) {
 		args args
 		want string
 	}{
+		{name: "1", args: args{body: string(all)}},
 		{name: "test", args: args{body: "<title>" + s + "</title>"},
 			want: "齐鲁工业大学录取咨询平台"},
 		{name: "2", args: args{body: "<title>Annual Reviews&#x4f7f;&#x7528;&#x6307;&#x5357;&#x8bed;&#x97f3;&#x8bfe;&#x4ef6;.mp4</title><link rel=\"alternate\" type=\"application/json+oembed\" href=\"https://workdrive.zohopublic.com.cn/services/oembed?type=json&url=https%3A%2F%2Fworkdrive.zohopublic.com.cn%2Fexternal%2FGDy6ryIAG5-2APbh\" title=\"Zoho WorkDrive\"/>\n<base href=\"/\" /> "}, want: "吾爱破解 - LCG - LSG|安卓破解|病毒分析|www.52pojie.cn "},
@@ -487,6 +492,32 @@ func Test_absUrl1(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := absUrl(tt.args.currUrl, tt.args.baseUrl); got != tt.want {
 				t.Errorf("absUrl() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_isGBK(t *testing.T) {
+	//s, _ := simplifiedchinese.GBK.NewEncoder().String("大萨达")
+	s, _ := simplifiedchinese.HZGB2312.NewEncoder().String("大萨达萨达")
+	type args struct {
+		data []byte
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "dsa",
+			args: args{data: []byte(s)},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isGBK(tt.args.data); got != tt.want {
+				t.Errorf("isGBK() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -3,7 +3,7 @@ package Processor
 import (
 	"GScan/pkg"
 	"GScan/pkg/logger"
-	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/net/html/charset"
 	"html"
 	"net/url"
 	"path/filepath"
@@ -216,6 +216,7 @@ func Unique(intSlice []string) []string {
 	return list
 }
 func Gettitle(data []byte) string {
+	encoding, _, _ := charset.DetermineEncoding(data, "text/html; charset=utf-8")
 	body := pkg.Bytes2String(data)
 	re := regexp.MustCompile(`(?i)<title>(.*?)</title>`)
 	title_name := re.FindAllStringSubmatch(body, 1)
@@ -223,14 +224,12 @@ func Gettitle(data []byte) string {
 		return ""
 	}
 	title := html.UnescapeString(title_name[0][1])
-	//return title
-	if isGBK([]byte(title)) {
-		s, err := simplifiedchinese.GBK.NewDecoder().String(title)
-		if err == nil {
-			return s
-		}
+
+	s, err := encoding.NewDecoder().String(title)
+	if err != nil {
+		return title
 	}
-	return title
+	return s
 }
 func absUrl(currUrl, baseUrl string) string {
 	urlInfo, err := url.Parse(currUrl)
