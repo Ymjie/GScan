@@ -141,9 +141,9 @@ func HtmlFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 			if strings.HasPrefix(raUrl, "//") {
 				patchDomain := ParseURL(raUrl)
 				if patchDomain == domain {
-					parserulfunc(scheme+raUrl, &urls)
+					parserulfunc(scheme+":"+raUrl, &urls)
 				} else {
-					parserulfunc(scheme+raUrl, &extrls)
+					parserulfunc(scheme+":"+raUrl, &extrls)
 				}
 			} else {
 				parserulfunc(absUrl(raUrl, iurl), &urls)
