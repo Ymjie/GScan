@@ -67,6 +67,6 @@ func (s *Spider) worker(ctx context.Context, ctxfunc context.CancelFunc, wg *syn
 func (s *Spider) datapress(ctx context.Context, page *dao.Page, data []byte) {
 	s.Processor(page, data)
 	s.DataProcessor.Handler(ctx, page, data)
-	page = nil
+	dao.PagePool.Put(page)
 	data = nil //触发GC
 }

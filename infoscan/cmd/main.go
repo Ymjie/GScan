@@ -10,11 +10,17 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strconv"
 	"time"
 )
+
+import _ "net/http/pprof"
+
+const debugmod = false
 
 var a *api.Api
 var Config *config.Config
@@ -85,8 +91,28 @@ Github:  https://github.com/Ymjie/GScan
 ---------------------------------------------------------------`)
 }
 
+func debugs() {
+	debug.SetGCPercent(10)
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		for {
+			debug.FreeOSMemory()
+			<-ticker.C
+		}
+	}()
+}
+
 func init() {
+	debugs()
 	banner()
+	if debugmod {
+		go func() {
+			err := http.ListenAndServe("0.0.0.0:9990", nil)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
+	}
 	//配置文件读取
 	c, err := config.LoadConfig("config.yml")
 	if err != nil {

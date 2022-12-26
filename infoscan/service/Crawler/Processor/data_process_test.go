@@ -419,7 +419,7 @@ func Test_absUrl(t *testing.T) {
 
 func TestGettitle(t *testing.T) {
 	s, _ := simplifiedchinese.GBK.NewEncoder().String("安大大")
-	get, _ := http.Get("https://www.sogou.com/")
+	get, _ := http.Get("https://www.cnr.cn/sd/gd/20220904/t20220904_525998421.shtml")
 	all, _ := io.ReadAll(get.Body)
 	type args struct {
 		body string

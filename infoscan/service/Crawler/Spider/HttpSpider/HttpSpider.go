@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -64,26 +65,34 @@ func NewHttpSpider(config *config.Httpspider) *HttpSpider {
 
 	return hs
 }
+
+type hr map[string]string
+
+var HeaderPool = sync.Pool{
+	New: func() interface{} {
+		return new(hr)
+	},
+}
+
 func (h *HttpSpider) GetUrl(page *dao.Page) ([]byte, error) {
 	request, err := http.NewRequest(http.MethodGet, page.URL, nil)
 	if err != nil {
 		return nil, err
 	}
-
+	request.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0")
 	for _, header := range h.config.DomainHeaders {
 		matched, _ := regexp.Match(header.Domain, []byte(page.URL))
 		if matched {
-			var Header map[string]string
-			err := json.Unmarshal([]byte(header.Headers), &Header)
+			m := HeaderPool.Get().(*hr)
+			err := json.Unmarshal([]byte(header.Headers), m)
 			if err == nil {
-				for k, v := range Header {
+				for k, v := range *m {
 					if v != "" {
 						request.Header.Set(k, v)
 					}
 				}
-			} else {
-				request.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0")
 			}
+			HeaderPool.Put(m)
 			break
 		}
 	}
