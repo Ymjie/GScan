@@ -4,6 +4,7 @@ import (
 	"GScan/pkg"
 	"GScan/pkg/logger"
 	"golang.org/x/net/html/charset"
+	encoding2 "golang.org/x/text/encoding"
 	"html"
 	"net/url"
 	"path/filepath"
@@ -216,7 +217,10 @@ func Unique(intSlice []string) []string {
 	return list
 }
 func Gettitle(data []byte) string {
-	encoding, _, _ := charset.DetermineEncoding(data, "text/html; charset=utf-8")
+	encoding, name, _ := charset.DetermineEncoding(data, "")
+	if name == "windows-1252" {
+		encoding = encoding2.Nop
+	}
 	body := pkg.Bytes2String(data)
 	re := regexp.MustCompile(`(?i)<title>(.*?)</title>`)
 	title_name := re.FindAllStringSubmatch(body, 1)

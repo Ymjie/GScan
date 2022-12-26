@@ -5,6 +5,7 @@ import (
 	"GScan/infoscan/service/Crawler/Processor"
 	"GScan/pkg/logger"
 	"errors"
+	"gorm.io/gorm"
 	"net/url"
 	"strings"
 )
@@ -77,12 +78,22 @@ func (s *Spider) AddNewPage(urls []*url.URL) ([]*dao.Page, error) {
 		strurl := surl.String()[len(surl.Scheme)+3:]
 		if ok := s.BloomFilter.TestString(strurl); !ok {
 			s.BloomFilter.AddString(strurl)
-			pg := &dao.Page{
-				JobID:      s.JobID,
-				Status:     "未访问",
-				URL:        surl.String(),
-				ExtURLList: []string{},
-			}
+			pg := dao.PagePool.Get().(*dao.Page)
+			pg.JobID = s.JobID
+			pg.Status = "未访问"
+			pg.Model = gorm.Model{}
+			pg.URL = surl.String()
+			pg.Error = ""
+			pg.ErrorNum = 0
+			pg.Code = 0
+			pg.Type = ""
+			pg.Length = -1
+			//pg = &dao.Page{
+			//	JobID:      s.JobID,
+			//	Status:     "未访问",
+			//	URL:        surl.String(),
+			//	ExtURLList: []string{},
+			//}
 			pgs = append(pgs, pg)
 		}
 	}

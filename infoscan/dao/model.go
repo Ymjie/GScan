@@ -6,7 +6,14 @@ import (
 	"encoding/json"
 	"gorm.io/gorm"
 	"net/url"
+	"sync"
 )
+
+var PagePool = sync.Pool{
+	New: func() interface{} {
+		return new(Page)
+	},
+}
 
 type SliceType[T uint | string] []T
 
