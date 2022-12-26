@@ -121,7 +121,8 @@ func HtmlFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 		if raUrl == "//" || raUrl == "/" {
 			continue
 		}
-		if raUrl == "javascript:;" {
+		if strings.Contains(raUrl, "javascript:vo") {
+			//javascript:void(0)
 			continue
 		}
 		if ckSuffixe(raUrl) {
