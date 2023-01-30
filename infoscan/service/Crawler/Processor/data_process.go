@@ -47,16 +47,17 @@ func HtmlFind(data string) []string {
 }
 
 func PageFind(bytesource []byte) []string {
-	bytesource = regexp.MustCompile(`(?si)<script.*?</script>`).ReplaceAll(bytesource, []byte(" "))
-	bytesource = regexp.MustCompile(`(?si)<style.*?</style>`).ReplaceAll(bytesource, []byte(" "))
+	//占用内存太大，暂无方法解决，牺牲准确性。
+	//bytesource = regexp.MustCompile(`(?si)<script.*?</script>`).ReplaceAll(bytesource, []byte(" "))
+	//bytesource = regexp.MustCompile(`(?si)<style.*?</style>`).ReplaceAll(bytesource, []byte(" "))
 	source := pkg.Bytes2String(regexp.MustCompile("(?si)<.*?>").ReplaceAll(bytesource, []byte(" ")))
 	source = html.UnescapeString(source)
 	var links []string
 	// source = strings.ToLower(source)
-	if len(source) > 1000000 {
-		source = strings.ReplaceAll(source, ";", ";\r\n")
-		source = strings.ReplaceAll(source, ",", ",\r\n")
-	}
+	//if len(source) > 1000000 {
+	//	source = strings.ReplaceAll(source, ";", ";\r\n")
+	//	source = strings.ReplaceAll(source, ",", ",\r\n")
+	//}
 	source = DecodeChars(source)
 
 	match := urlReg.FindAllStringSubmatch(source, -1)

@@ -13,16 +13,16 @@ import (
 
 var DefaultHandlerFuncs = []HandlerFunc{DFPF, EXLinkPF, SPIPF, Words}
 var whitelist []string
+var Keywords []string
 
 type HandlerFunc func(page *dao.Page, data []byte) (*dao.ProcessResult, error)
 type DataProcessor struct {
 	dao.IProcessorDAO
-	hsf       []HandlerFunc
-	JobID     uint
-	whitelist []string
+	hsf   []HandlerFunc
+	JobID uint
 }
 type IProcessor interface {
-	Handler(ctx context.Context, page *dao.Page, data []byte)
+	Handler(ctx context.Context, host string, page *dao.Page, data []byte)
 }
 
 func NewDataProcessor(jobid uint, db dao.IProcessorDAO, funs []HandlerFunc, whitelistFile string) *DataProcessor {
@@ -40,19 +40,34 @@ func NewDataProcessor(jobid uint, db dao.IProcessorDAO, funs []HandlerFunc, whit
 			log.Fatal(err)
 		}
 	}
+	if len(Keywords) == 0 {
+		//executable, _ := os.Executable()
+		//dir := filepath.Dir(executable)
+		f, err := os.Open("keywords.txt")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			Keywords = append(Keywords, scanner.Text())
+		}
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
+		}
+	}
 	return &DataProcessor{
 		IProcessorDAO: db,
 		hsf:           funs,
 		JobID:         jobid,
-		whitelist:     whitelist,
 	}
 }
-func (p *DataProcessor) Handler(ctx context.Context, page *dao.Page, data []byte) {
+func (p *DataProcessor) Handler(ctx context.Context, host string, page *dao.Page, data []byte) {
 	parse, err := url.Parse(page.URL)
 	if err != nil {
 		return
 	}
-	for _, s := range p.whitelist {
+	for _, s := range whitelist {
 		if strings.Contains(parse.Scheme+"://"+parse.Host, s) {
 			return
 		}
@@ -63,7 +78,7 @@ func (p *DataProcessor) Handler(ctx context.Context, page *dao.Page, data []byte
 			continue
 		}
 		result.JobID = p.JobID
-		logger.PF(logger.LINFO, "<DataProcessor>[%d][%s]%s", result.PageID, result.Type, result.Data)
+		logger.PF(logger.LINFO, "<DataProcessor>[%s][%s]%s", host, result.Type, result.Data)
 		p.IProcessorDAO.AddResult(result)
 	}
 

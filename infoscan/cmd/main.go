@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strconv"
 	"time"
 )
@@ -80,29 +79,29 @@ Usage:
 
 func banner() {
 	fmt.Println(`---------------------------------------------------------------
-Version: InfoScan 0.4.6beta
+Version: InfoScan 0.4.7beta
 Email:   i@vshex.com
 Github:  https://github.com/Ymjie/GScan
 ---------------------------------------------------------------`)
 }
 
-func debugs() {
-	debug.SetGCPercent(10)
-	go func() {
-		ticker := time.NewTicker(10 * time.Second)
-		for {
-			debug.FreeOSMemory()
-			<-ticker.C
-		}
-	}()
-}
+//func debugs() {
+//	debug.SetGCPercent(10)
+//	go func() {
+//		ticker := time.NewTicker(10 * time.Second)
+//		for {
+//			debug.FreeOSMemory()
+//			<-ticker.C
+//		}
+//	}()
+//}
 
 func init() {
-	debugs()
+	//debugs()
 	banner()
 	if debugmod {
 		go func() {
-			err := http.ListenAndServe("0.0.0.0:9990", nil)
+			err := http.ListenAndServe("0.0.0.0:9991", nil)
 			if err != nil {
 				log.Fatal(err)
 			}

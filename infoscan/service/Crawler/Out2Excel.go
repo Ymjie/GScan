@@ -9,6 +9,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 	"html"
+	"io/ioutil"
 	"log"
 	"strings"
 )
@@ -141,7 +142,8 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 	}
 	id := map[string]int{}
 	for k, r := range result {
-		fmt.Printf("<Out2Excel>正在输出第%d个结果\r", k)
+		lensssss := len(result)
+		fmt.Printf("<Out2Excel>正在输出(%d/%d)\r", k, lensssss)
 		//raw := map[string]interface{}{}
 		if _, ok := id[r.Type]; !ok {
 			id[r.Type] = 2
@@ -183,4 +185,16 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 		return
 	}
 	logger.PF(logger.LINFO, "<Out2Excel>输出结果完成，%s", filename)
+}
+func Out2Json(jobid uint, DAO dao.IDAO, filename string) {
+	result := DAO.GetResult(jobid)
+	if len(result) == 0 {
+		log.Fatalln("结果为空！")
+	}
+	logger.PF(logger.LINFO, "<Out2Json>正在输出结果")
+	marshal, err := json.Marshal(&result)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	ioutil.WriteFile(filename, marshal, 0644)
 }

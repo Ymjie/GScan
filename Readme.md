@@ -55,6 +55,11 @@ _如有需要可自行编译Linux版本_
 欢迎贡献关键词。
 
 **对于可下载文件的说明：**
+使用downloader目录下的工具
+```shell
+用法：
+downloader.exe url.txt
+```
 推荐使用迅雷等专业的下载工具批量下载，然后使用`FileSearchy`进行文件扫描。
 
 

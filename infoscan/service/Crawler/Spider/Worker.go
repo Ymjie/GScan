@@ -4,6 +4,7 @@ import (
 	"GScan/infoscan/dao"
 	"GScan/pkg/logger"
 	"context"
+	"runtime/debug"
 	"sync"
 )
 
@@ -64,9 +65,16 @@ func (s *Spider) worker(ctx context.Context, ctxfunc context.CancelFunc, wg *syn
 
 }
 
+var num int
+
 func (s *Spider) datapress(ctx context.Context, page *dao.Page, data []byte) {
 	s.Processor(page, data)
-	s.DataProcessor.Handler(ctx, page, data)
+	s.DataProcessor.Handler(ctx, s.Host, page, data)
 	dao.PagePool.Put(page)
 	data = nil //触发GC
+	num++
+	if num%50 == 0 {
+		debug.FreeOSMemory()
+		logger.PF(logger.LDEBUG, "<Worker>Run debug.FreeOSMemory()")
+	}
 }

@@ -83,6 +83,7 @@ func (s *Spider) AddNewPage(urls []*url.URL) ([]*dao.Page, error) {
 			pg.Status = "未访问"
 			pg.Model = gorm.Model{}
 			pg.URL = surl.String()
+			pg.Title = ""
 			pg.Error = ""
 			pg.ErrorNum = 0
 			pg.Code = 0
