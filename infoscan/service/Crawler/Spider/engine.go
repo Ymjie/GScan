@@ -31,12 +31,16 @@ func (s *Spider) Processor(page *dao.Page, body []byte) {
 				s.AddUrlbypage([]*dao.Page{page})
 			}
 		}
-		logger.PF(logger.LWARN, "<Spider>[%s]%s访问出错(%d),%s", s.Host, page.URL, page.ErrorNum, page.Error)
+		if !strings.HasPrefix(page.Error, "not text") {
+			logger.PF(logger.LWARN, "<Spider>[%s]%s访问出错(%d),%s", s.Host, page.URL, page.ErrorNum, page.Error)
+		}
 		s.DAO.UpdatePage(page)
 		return
 	}
 	urls := Processor.Findurl(body, page.URL)
-	logger.PF(logger.LDEBUG, "<Spider>[%s]%s发现内链%d个，外链%d个", s.Host, page.URL, len(urls[0]), len(urls[1]))
+	if len(urls[0]) > 0 || len(urls[1]) > 0 {
+		logger.PF(logger.LINFO, "<Spider>[%s]%s发现内链%d个，外链%d个", s.Host, page.URL, len(urls[0]), len(urls[1]))
+	}
 	for _, u := range urls[1] {
 		page.ExtURLList = append(page.ExtURLList, u.String())
 	}
@@ -82,6 +86,7 @@ func (s *Spider) AddNewPage(urls []*url.URL) ([]*dao.Page, error) {
 			pg.JobID = s.JobID
 			pg.Status = "未访问"
 			pg.Model = gorm.Model{}
+			pg.ID = 0
 			pg.URL = surl.String()
 			pg.Title = ""
 			pg.Error = ""

@@ -3,7 +3,7 @@ Version: 0.4
 ResultPath: ./result
 LogPath: ./log
 LogLevel: 1 # 日志记录等级，DEBUG:1 WARN:2 INFO:3 ERROR:4 FATAL:5
-LogPrintingLevel: 1 #日志打印等级
+LogPrintingLevel: 2 #日志打印等级
 SpiderMaxNum: 5 #最大爬虫数量
 whitelistFile : whitelist.txt #白名单，白名单不做内容分析
 Spider:

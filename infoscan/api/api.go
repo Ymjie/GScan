@@ -34,7 +34,6 @@ func (a *Api) StartCrawlerJob(urls []string) (name string, id uint) {
 }
 
 func (a *Api) Out2Excel(jobID uint, filename string) {
-	//Crawler.Out2Excel(jobID, a.db, filepath.Join(a.config.ResultPath, filename))
 	Crawler.Out2Excel(jobID, a.db, filename)
 }
 

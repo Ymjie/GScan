@@ -25,6 +25,7 @@ type crawler struct {
 	BloomFilter *bloom.Filter
 	Urls        []string
 	Scheduler   *pkg.QueueScheduler[string]
+	WXC         *Processor.WXDomainCheck
 }
 
 func NewCrawlerJob(config *config.Config, db dao.IDAO, name string, urls []string) *CrawlerJob {
@@ -40,6 +41,9 @@ func NewCrawlerJob(config *config.Config, db dao.IDAO, name string, urls []strin
 			Spiders:     map[string]*Spider.Spider{},
 			Urls:        urls,
 			Scheduler:   s,
+			WXC: &Processor.WXDomainCheck{
+				IProcessorDAO: db,
+			},
 		},
 	}
 }
@@ -69,6 +73,7 @@ func (c *CrawlerJob) Run(ctx context.Context) {
 	c.init()
 	var wg sync.WaitGroup
 	cancel, cancelFunc := context.WithCancel(ctx)
+	go c.WXC.Run()
 	for i := 0; i < c.config.SpiderMaxNum; i++ {
 		wg.Add(1)
 		go func() {
@@ -108,12 +113,13 @@ func (c *CrawlerJob) CallbackFunc(page *dao.Page, body []byte) {
 }
 
 func (c *CrawlerJob) createSpider(URL *url.URL) *Spider.Spider {
+
 	spider :=
 		Spider.NewSpider(&c.config.Spider, c.Job.ID, c.DAO).
 			SetFilter(c.BloomFilter).
 			SetMainUrl(URL).
 			SetCallbackFunc(c.CallbackFunc).
 			SetReqer(HttpSpider.NewHttpSpider(&c.config.Spider.Httpspider)).
-			SetProcessor(Processor.NewDataProcessor(c.ID, c.DAO, Processor.DefaultHandlerFuncs, c.config.WhitelistFile))
+			SetProcessor(Processor.NewDataProcessor(c.ID, c.DAO, append(Processor.DefaultHandlerFuncs, c.WXC.Handler), c.config.WhitelistFile))
 	return spider
 }

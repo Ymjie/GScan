@@ -119,19 +119,19 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 		a := []string{}
 		if f.GetSheetIndex(r.Type) == -1 {
 			f.NewSheet(r.Type)
-			raw := map[string]interface{}{}
-			err := json.Unmarshal([]byte(r.Data), &raw)
-			if err != nil {
-				fmt.Println(err.Error())
-				continue
-			}
+			//raw := map[string]interface{}{}
+			//err := json.Unmarshal([]byte(r.Data), &raw)
+			//if err != nil {
+			//	fmt.Println(err.Error())
+			//	continue
+			//}
 			a = append(a, "URL")
 			a = append(a, "父URL")
 			//for k, _ := range raw {
 			//	a = append(a, k)
 			//}
 			a = append(a, "数据")
-			err = f.SetSheetRow(r.Type, "A1", &a)
+			err := f.SetSheetRow(r.Type, "A1", &a)
 			if err != nil {
 				fmt.Println(err.Error())
 				continue
@@ -173,7 +173,7 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 		}
 		a = append(a, url1.URL)
 		a = append(a, url2.URL)
-		a = append(a, fmt.Sprintf("%s", r.Data))
+		a = append(a, r.Data)
 		err = f.SetSheetRow(r.Type, axis, &a)
 		if err != nil {
 			fmt.Println(err.Error())

@@ -92,10 +92,10 @@ func PageFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 	var extrls []*url.URL
 	parse, _ := url.Parse(iurl)
 	for _, u := range ulist {
-		if ckSuffixe(u) {
-			continue
-		}
 		if up, err := url.Parse(u); err == nil {
+			if ckSuffixe(up.Path) {
+				continue
+			}
 			if up.Scheme == "" {
 				up.Scheme = "http"
 			}
@@ -105,7 +105,7 @@ func PageFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 				extrls = append(extrls, up)
 			}
 		} else {
-			logger.PF(logger.LERROR, "<URLFinder>页面内容中的URL:%s 处理失败：%s,来自页面：%s", u, err.Error(), iurl)
+			logger.PF(logger.LDEBUG, "<URLFinder>页面内容中的URL:%s 处理失败：%s,来自页面：%s", u, err.Error(), iurl)
 		}
 	}
 	return [][]*url.URL{urls, extrls}
@@ -122,18 +122,17 @@ func HtmlFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 		if raUrl == "//" || raUrl == "/" {
 			continue
 		}
-		if strings.Contains(raUrl, "javascript:vo") {
+		if strings.Contains(raUrl, "javascript:") {
 			//javascript:void(0)
-			continue
-		}
-		if ckSuffixe(raUrl) {
 			continue
 		}
 		parserulfunc := func(urlstr string, sliec *[]*url.URL) {
 			if u, err := url.Parse(urlstr); err != nil {
-				logger.PF(logger.LERROR, "<URLFinder>Html标签属性中的URL:%s 处理失败：%s,来自页面：%s", urlstr, err.Error(), iurl)
+				logger.PF(logger.LDEBUG, "<URLFinder>Html标签属性中的URL:%s 处理失败：%s,来自页面：%s", urlstr, err.Error(), iurl)
 			} else if u.Host == "" {
-				logger.PF(logger.LERROR, "<URLFinder>Html标签属性中的URL:%s 处理失败,来自页面：%s", urlstr, iurl)
+				logger.PF(logger.LDEBUG, "<URLFinder>Html标签属性中的URL:%s 处理失败,来自页面：%s", urlstr, iurl)
+			} else if ckSuffixe(u.Path) {
+				return
 			} else {
 				*sliec = append(*sliec, u)
 			}

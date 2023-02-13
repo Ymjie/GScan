@@ -54,6 +54,9 @@ func EXLinkPF(page *dao.Page, data []byte) (*dao.ProcessResult, error) { //exter
 	if !page.External {
 		return &result, errors.New("no data")
 	}
+	if strings.Contains(page.Error, "not text") {
+		return &result, errors.New("no data")
+	}
 	if page.Code == 0 {
 		result.Type = "外部死链"
 	}
