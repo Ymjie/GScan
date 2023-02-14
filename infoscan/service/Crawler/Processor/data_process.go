@@ -21,9 +21,10 @@ var (
 )
 
 /*
-	将html结构中的url数据进行处理：
-		1.提取url数据
-		2.去除不同域
+将html结构中的url数据进行处理：
+
+	1.提取url数据
+	2.去除不同域
 */
 func Findurl(body []byte, Murl string) [][]*url.URL {
 	data := pkg.Bytes2String(body)
@@ -165,27 +166,12 @@ func HtmlFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 }
 
 // ParseURL 从URL中提取域名
-func ParseURL(url string) string {
-	var domain string
-	//"https://www.baidu.com"
-	if strings.Contains(url, "http") || strings.Contains(url, "https") {
-		frontSep := url[strings.Index(url, ":")+3:]
-		if !strings.Contains(frontSep, "/") {
-			domain = frontSep
-		} else {
-			domain = frontSep[:strings.Index(frontSep, "/")]
-		}
-		//"//www.baidu.com/
-	} else {
-		frontSep := url[strings.Index(url, "/")+2:]
-		if !strings.Contains(frontSep, "/") {
-			domain = frontSep
-		} else {
-			domain = frontSep[:strings.Index(frontSep, "/")]
-		}
+func ParseURL(rawurl string) string {
+	u, err := url.Parse(rawurl)
+	if err != nil {
+		return ""
 	}
-
-	return domain
+	return u.Hostname()
 }
 
 func DecodeChars(s string) string {

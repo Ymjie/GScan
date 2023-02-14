@@ -73,7 +73,7 @@ type WXRESP struct {
 	Desc  string `json:"desc"`
 }
 
-var re = regexp.MustCompile(`(?m)cgiData = (.*?);
+var resre = regexp.MustCompile(`(?m)cgiData = (.*?);
     </script>`)
 
 func (w *WXDomainCheck) check(url0 string) (string, bool) {
@@ -98,8 +98,7 @@ func (w *WXDomainCheck) check(url0 string) (string, bool) {
 		if err != nil {
 			return err.Error(), true
 		}
-		re.FindAllSubmatch(all, -1)
-		submatch := re.FindAllSubmatch(all, -1)
+		submatch := resre.FindAllSubmatch(all, -1)
 		if len(submatch) == 0 {
 			return "检测失败", true
 		}
