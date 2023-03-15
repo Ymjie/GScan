@@ -13,6 +13,7 @@ type ICrawlerDAO interface {
 	UpdatePage(page *Page)
 	DeleteById(ID int64)
 	GetOnePages(page *Page) *Page
+	GetAllPages(page *Page) []*Page
 }
 
 type IProcessorDAO interface {
@@ -22,6 +23,7 @@ type IProcessorDAO interface {
 type IWebTreeDAO interface {
 	WebTreeAdd(jobID uint, FPID uint, subID []uint)
 	WebTreeGet(jobID uint, id uint) ([]uint, error)
+	WebTreeGetAll(jobID uint) ([]*WebTree, error)
 	WebPageLink(jobID uint, id uint) [][]uint
 }
 

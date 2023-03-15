@@ -108,6 +108,20 @@ func (D *DAO) WebTreeGet(jobID uint, id uint) ([]uint, error) {
 
 	return res.FiD, nil
 }
+
+func (D *DAO) WebTreeGetAll(jobID uint) ([]*dao.WebTree, error) {
+	D.Mutex.Lock()
+	defer D.Mutex.Unlock()
+	var res []*dao.WebTree
+	err := D.db.Where(dao.WebTree{
+		JobID: jobID,
+	}).Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (D *DAO) WebPageLink(jobID uint, id uint) [][]uint {
 	var res [][]uint
 	getf(D, jobID, id, res)
@@ -137,6 +151,14 @@ func (D *DAO) GetOnePages(page *dao.Page) *dao.Page {
 	D.Mutex.Lock()
 	var rp *dao.Page
 	D.db.Where(page).First(&rp)
+	D.Mutex.Unlock()
+	return rp
+}
+
+func (D *DAO) GetAllPages(page *dao.Page) []*dao.Page {
+	D.Mutex.Lock()
+	var rp []*dao.Page
+	D.db.Where(page).Find(&rp)
 	D.Mutex.Unlock()
 	return rp
 }

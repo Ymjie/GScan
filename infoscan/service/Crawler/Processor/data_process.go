@@ -166,8 +166,8 @@ func HtmlFindUrlpressor(ulist []string, iurl string) [][]*url.URL {
 }
 
 // ParseURL 从URL中提取域名
-func ParseURL(rawurl string) string {
-	u, err := url.Parse(rawurl)
+func ParseURL(Url string) string {
+	u, err := url.Parse(Url)
 	if err != nil {
 		return ""
 	}
