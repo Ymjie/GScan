@@ -11,7 +11,7 @@ func AskForConfirmation() bool {
 
 	_, err := fmt.Scanln(&response)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	switch strings.ToLower(response) {

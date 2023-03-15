@@ -53,9 +53,10 @@ func main() {
 			fmt.Print(`InfoScan
 
 Usage:
-   infoscan.exe
-   infoscan.exe ls               #列出所有任务
-   infoscan.exe export <JobID>   #导出任务结果`)
+   infoscan                             #自动扫描目录下url.txt文件
+   infoscan run -u url.txt -o name.xlsx #扫描并输出结果
+   infoscan ls                          #列出所有任务
+   infoscan export <JobID>              #导出任务结果`)
 		}
 	} else {
 		urls, err := geturl("url.txt")
