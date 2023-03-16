@@ -165,7 +165,7 @@ func (D *DAO) WebTreeGetAll(jobID uint) ([]*dao.WebTree, error) {
 func (D *DAO) GetAllPages(page *dao.Page) []*dao.Page {
 	D.Mutex.Lock()
 	var rp []*dao.Page
-	D.db.Where(page).Find(&rp)
+	D.db.Select("ID", "URL").Where(page).Find(&rp)
 	D.Mutex.Unlock()
 	return rp
 }
