@@ -80,7 +80,7 @@ Usage:
 
 func banner() {
 	fmt.Println(`---------------------------------------------------------------
-Version: InfoScan 0.4.9
+Version: InfoScan 0.4.10
 Email:   i@vshex.com
 Github:  https://github.com/Ymjie/GScan
 ---------------------------------------------------------------`)
