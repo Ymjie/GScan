@@ -107,6 +107,53 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 		log.Fatalln("结果为空！")
 	}
 	logger.PF(logger.LINFO, "<Out2Excel>正在输出结果")
+
+	// 数据写入内存
+	sheetData := make(map[string][][]string)
+	pagesData := DAO.GetAllPages(&dao.Page{
+		JobID: jobid,
+	})
+	webTreeData, _ := DAO.WebTreeGetAll(jobid)
+	webTrees := make(map[uint]*dao.WebTree)
+	pages := make(map[uint]*dao.Page)
+
+	for _, page := range pagesData {
+		pages[page.ID] = page
+	}
+	for _, webtree := range webTreeData {
+		webTrees[webtree.PageID] = webtree
+	}
+	for _, r := range result {
+		if _, ok := sheetData[r.Type]; !ok {
+			sheetData[r.Type] = [][]string{{
+				"URL",
+				"父URL",
+				"数据",
+			}}
+		}
+		// 获取 URL 和父URL
+		url1 := pages[r.PageID]
+		url2 := ""
+		var get []uint
+		if webTrees[r.PageID] == nil {
+			url2 = "查询失败"
+		} else {
+			for _, v := range webTrees[r.PageID].FiD {
+				get = append(get, v)
+			}
+			if pages[get[0]] != nil {
+				url2 = pages[get[0]].URL
+			} else {
+				url2 = "查询失败"
+			}
+		}
+		sheetData[r.Type] = append(sheetData[r.Type], []string{
+			url1.URL,
+			url2,
+			r.Data,
+		})
+	}
+
 	f := excelize.NewFile()
 	defer func() {
 		// Close the spreadsheet.
@@ -115,70 +162,31 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 		}
 	}()
 
-	for _, r := range result {
-		a := []string{}
-		if f.GetSheetIndex(r.Type) == -1 {
-			f.NewSheet(r.Type)
-			//raw := map[string]interface{}{}
-			//err := json.Unmarshal([]byte(r.Data), &raw)
-			//if err != nil {
-			//	fmt.Println(err.Error())
-			//	continue
-			//}
-			a = append(a, "URL")
-			a = append(a, "父URL")
-			//for k, _ := range raw {
-			//	a = append(a, k)
-			//}
-			a = append(a, "数据")
-			err := f.SetSheetRow(r.Type, "A1", &a)
+	// 将数据写入文件
+	for sheetName, data := range sheetData {
+		if f.GetSheetIndex(sheetName) == -1 {
+			f.NewSheet(sheetName)
+		}
+		err := f.SetSheetRow(sheetName, "A1", &data[0])
+		if err != nil {
+			fmt.Println(err.Error())
+			continue
+		}
+		err = f.SetSheetRow(sheetName, "A2", &data[1])
+		if err != nil {
+			fmt.Println(err.Error())
+			continue
+		}
+		for i := 2; i < len(data); i++ {
+			axis := fmt.Sprintf("A%d", i+1)
+			err = f.SetSheetRow(sheetName, axis, &data[i])
 			if err != nil {
 				fmt.Println(err.Error())
 				continue
 			}
-		} else {
-			continue
 		}
 	}
-	id := map[string]int{}
-	for k, r := range result {
-		lensssss := len(result)
-		fmt.Printf("<Out2Excel>正在输出(%d/%d)\r", k, lensssss)
-		//raw := map[string]interface{}{}
-		if _, ok := id[r.Type]; !ok {
-			id[r.Type] = 2
-		} else {
-			id[r.Type]++
-		}
-		axis := fmt.Sprintf("A%d", id[r.Type])
-		a := []string{}
-		//err := json.Unmarshal([]byte(r.Data), &raw)
-		//if err != nil {
-		//	fmt.Println(err.Error())
-		//	continue
-		//}
-		url1 := DAO.GetOnePages(&dao.Page{
-			Model: gorm.Model{ID: r.PageID},
-			JobID: jobid,
-		})
-		get, err := DAO.WebTreeGet(r.JobID, r.PageID)
-		url2 := &dao.Page{}
-		if err == nil {
-			url2 = DAO.GetOnePages(&dao.Page{
-				Model: gorm.Model{ID: get[0]},
-				JobID: jobid,
-			})
-		} else {
-			url2.URL = "查询失败"
-		}
-		a = append(a, url1.URL)
-		a = append(a, url2.URL)
-		a = append(a, r.Data)
-		err = f.SetSheetRow(r.Type, axis, &a)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-	}
+
 	f.DeleteSheet("Sheet1")
 	if err := f.SaveAs(filename); err != nil {
 		fmt.Println(err.Error())
@@ -186,6 +194,8 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 	}
 	logger.PF(logger.LINFO, "<Out2Excel>输出结果完成，%s", filename)
 }
+
+
 func Out2Json(jobid uint, DAO dao.IDAO, filename string) {
 	result := DAO.GetResult(jobid)
 	if len(result) == 0 {

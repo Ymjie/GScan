@@ -2,7 +2,7 @@ package sqlite
 
 import (
 	"GScan/infoscan/dao"
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
@@ -147,4 +147,25 @@ func (D *DAO) Getjobs() []*dao.Job {
 	D.db.Find(&jobs)
 	D.Mutex.Unlock()
 	return jobs
+}
+
+func (D *DAO) WebTreeGetAll(jobID uint) ([]*dao.WebTree, error) {
+	D.Mutex.Lock()
+	defer D.Mutex.Unlock()
+	var res []*dao.WebTree
+	err := D.db.Where(dao.WebTree{
+		JobID: jobID,
+	}).Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (D *DAO) GetAllPages(page *dao.Page) []*dao.Page {
+	D.Mutex.Lock()
+	var rp []*dao.Page
+	D.db.Where(page).Find(&rp)
+	D.Mutex.Unlock()
+	return rp
 }
