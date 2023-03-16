@@ -1,0 +1,53 @@
+name: Release
+on: 
+  watch:
+    types: [started]
+  push:
+permissions:
+      contents: write
+      pull-requests: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          check-latest: true
+          go-version: '1.19'
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
+
+      - name: Go cache paths
+        id: go-cache-paths
+        run: |
+          echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
+          echo "go-build=$(go env GOCACHE)" >> $GITHUB_OUTPUT
+      - name: Cache go module
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ steps.go-cache-paths.outputs.go-mod }}
+            ${{ steps.go-cache-paths.outputs.go-build }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Build
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          NAME: infoscan
+          BINDIR: bin
+        run: |
+          cp Makefile infoscan/cmd/Makefile
+          cd infoscan/cmd/
+          mkdir target
+          make -j releases
+      - name: Upload Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: target/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
