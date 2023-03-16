@@ -1,8 +1,5 @@
 name: Release
-on: 
-  watch:
-    types: [started]
-  push:
+on: [push]
 permissions:
       contents: write
       pull-requests: read
