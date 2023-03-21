@@ -132,7 +132,11 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 			}}
 		}
 		// 获取 URL 和父URL
-		url1 := pages[r.PageID]
+		url1, ok := pages[r.PageID]
+		if !ok {
+			logger.PF(logger.LERROR, "<Out2Excel>[JobID:%d]结果列表中有不存在的PageID:%d", jobid, r.PageID) //目前造成这个bug的原因未知
+			continue
+		}
 		url2 := ""
 		var get []uint
 		if webTrees[r.PageID] == nil {
@@ -194,7 +198,6 @@ func Out2Excel(jobid uint, DAO dao.IDAO, filename string) {
 	}
 	logger.PF(logger.LINFO, "<Out2Excel>输出结果完成，%s", filename)
 }
-
 
 func Out2Json(jobid uint, DAO dao.IDAO, filename string) {
 	result := DAO.GetResult(jobid)
